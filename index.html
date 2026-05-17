@@ -14,7 +14,7 @@
                 <img src="logo.png" alt="Logo Sabula Sabuli" class="logo-img">
             </div>
             <h1 class="title">Sabula Sabuli</h1>
-            <p class="subtitle">DOWNLOAD SERTIFIKAT PESERTA</p>
+            <p class="subtitle">DOWNLOAD SERTIFIKAT</p>
         </header>
 
         <!-- Main Card -->
@@ -24,26 +24,37 @@
                 <h2 class="section-title">Pilih Data Peserta</h2>
 
                 <div class="form-group">
-                    <label for="jenjang">Jenjang Pendidikan</label>
+                    <label for="jenjang">Kategori</label>
                     <select id="jenjang" class="select-field">
-                        <option value="">-- Pilih Jenjang --</option>
+                        <option value="">-- Pilih Kategori --</option>
                         <option value="SD">SD</option>
                         <option value="SMP">SMP</option>
+                        <option value="Panitia">Panitia</option>
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="sekolahGroup">
                     <label for="sekolah">Nama Sekolah</label>
                     <select id="sekolah" class="select-field" disabled>
                         <option value="">-- Pilih Sekolah --</option>
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="sekolahInputGroup" style="display: none;">
+                    <label for="sekolahInput">Nama Sekolah</label>
+                    <input type="text" id="sekolahInput" class="select-field" placeholder="Masukkan nama sekolah">
+                </div>
+
+                <div class="form-group" id="pesertaGroup">
                     <label for="peserta">Nama Peserta</label>
                     <select id="peserta" class="select-field" disabled>
                         <option value="">-- Pilih Peserta --</option>
                     </select>
+                </div>
+
+                <div class="form-group" id="panitiaInputGroup" style="display: none;">
+                    <label for="panitiaName">Nama Committee</label>
+                    <input type="text" id="panitiaName" class="select-field" placeholder="Masukkan nama panitia">
                 </div>
             </section>
 
@@ -73,7 +84,7 @@
                             <p class="cert-topx">diberikan kepada</p>
                             <h2 class="cert-name" id="certName"></h2>
                             <p class="cert-school" id="certSchool"></p>
-                            <h2 class="cert-title">SEBAGAI PESERTA</h2>
+                            <h2 class="cert-title" id="certTitle">SEBAGAI PESERTA</h2>
                             <p class="cert-description" id="certDescription"></p>
                         </div>
                     </div>

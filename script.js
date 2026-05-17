@@ -7,7 +7,13 @@
 // ===== DOM Elements =====
 const jenjangSelect = document.getElementById('jenjang');
 const sekolahSelect = document.getElementById('sekolah');
+const sekolahGroup = document.getElementById('sekolahGroup');
+const sekolahInputGroup = document.getElementById('sekolahInputGroup');
+const sekolahInput = document.getElementById('sekolahInput');
 const pesertaSelect = document.getElementById('peserta');
+const pesertaGroup = document.getElementById('pesertaGroup');
+const panitiaInputGroup = document.getElementById('panitiaInputGroup');
+const panitiaNameInput = document.getElementById('panitiaName');
 const btnDownload = document.getElementById('btnDownload');
 
 const previewNotice = document.getElementById('previewNotice');
@@ -18,6 +24,7 @@ const certificateExport = document.getElementById('certificateExport');
 
 const certName = document.getElementById('certName');
 const certSchool = document.getElementById('certSchool');
+const certTitle = document.getElementById('certTitle');
 const certDescription = document.getElementById('certDescription');
 
 const waAdmin = document.getElementById('waAdmin');
@@ -135,6 +142,11 @@ function setupEventListeners() {
         handlePesertaChange
     );
 
+    panitiaNameInput.addEventListener(
+        'input',
+        handlePanitiaNameChange
+    );
+
     btnDownload.addEventListener(
         'click',
         generateAndDownloadPDF
@@ -159,8 +171,46 @@ function handleJenjangChange() {
     disableButton();
     hideCertificatePreview();
 
+    // Handle visibility based on category
+    if (jenjang === 'Panitia') {
+        // Show text input for sekolah, hide dropdown
+        sekolahGroup.style.display = 'none';
+        sekolahInputGroup.style.display = 'block';
+        sekolahInput.value = '';
+
+        // Hide peserta dropdown, show panitia name input
+        pesertaGroup.style.display = 'none';
+        panitiaInputGroup.style.display = 'block';
+        panitiaNameInput.value = '';
+
+        // Update preview notice text
+        previewNotice.querySelector('p').textContent =
+            'Pilih kategori dan masukkan nama untuk melihat preview sertifikat';
+    } else {
+        // Show dropdowns, hide text inputs
+        sekolahGroup.style.display = 'block';
+        sekolahInputGroup.style.display = 'none';
+
+        pesertaGroup.style.display = 'block';
+        panitiaInputGroup.style.display = 'none';
+
+        // Reset text inputs
+        sekolahInput.value = '';
+        panitiaNameInput.value = '';
+
+        // Show original notice text
+        previewNotice.querySelector('p').textContent =
+            'Pilih jenjang, sekolah, dan nama peserta untuk melihat preview sertifikat';
+    }
+
     if (!jenjang) {
         disableSelect(sekolahSelect);
+        sekolahGroup.style.display = 'block';
+        sekolahInputGroup.style.display = 'none';
+
+        pesertaGroup.style.display = 'block';
+        panitiaInputGroup.style.display = 'none';
+
         updateWhatsAppLink();
         return;
     }
@@ -196,6 +246,22 @@ function handleSekolahChange() {
         sekolah
     );
 
+    updateWhatsAppLink();
+}
+
+// ===== panitia Name Input Change =====
+function handlePanitiaNameChange() {
+    const name = panitiaNameInput.value.trim();
+
+    if (!name) {
+        disableButton();
+        hideCertificatePreview();
+        updateWhatsAppLink();
+        return;
+    }
+
+    showPanitiaCertificatePreview(name);
+    enableButton();
     updateWhatsAppLink();
 }
 
@@ -279,7 +345,23 @@ function showCertificatePreview(
 ) {
     certName.textContent = peserta.toUpperCase();
     certSchool.textContent = sekolah;
+    certSchool.style.display = 'block';
+    certTitle.textContent = 'SEBAGAI PESERTA';
     certDescription.textContent = `dalam rangka "SABULA-SABULI PANRANNUANGKU FESTIVAL 2026" tingkat ${jenjang} pada tanggal 16-17 Mei 2026 di Kampung Adat dan Budaya BBRG yang dilaksanakan oleh penerima program perseorangan atas nama "Satriana" dengan judul kegiatan "Pakkiok Bunting Na Aru Tubarani; Digitalisasi dan Festival Sastra Budaya Lisan Makassar"`;
+
+    previewNotice.style.display = 'none';
+    certificateWrapper.style.display = 'block';
+}
+
+// ===== panitia Certificate Preview =====
+function showPanitiaCertificatePreview(name) {
+    const sekolah = sekolahInput.value.trim();
+
+    certName.textContent = name.toUpperCase();
+    certSchool.textContent = sekolah;
+    certSchool.style.display = 'block';
+    certTitle.textContent = 'SEBAGAI PANITIA';
+    certDescription.textContent = `dalam rangka "SABULA-SABULI PANRANNUANGKU FESTIVAL 2026" pada tanggal 16-17 Mei 2026 di Kampung Adat dan Budaya BBRG yang dilaksanakan oleh penerima program perseorangan atas nama "Satriana" dengan judul kegiatan "Pakkiok Bunting Na Aru Tubarani; Digitalisasi dan Festival Sastra Budaya Lisan Makassar"`;
 
     previewNotice.style.display = 'none';
     certificateWrapper.style.display = 'block';
@@ -301,19 +383,22 @@ function updateWhatsAppLink() {
     const jenjang =
         jenjangSelect.value || '-';
 
-    const sekolah =
-        sekolahSelect.value || '-';
+    let sekolah = sekolahSelect.value || '-';
+    let peserta = pesertaSelect.value || '-';
 
-    const peserta =
-        pesertaSelect.value || '-';
+    // Handle panitia case
+    if (jenjang === 'Panitia') {
+        sekolah = sekolahInput.value.trim() || '-';
+        peserta = panitiaNameInput.value.trim() || '-';
+    }
 
     const message =
 `Halo Admin, saya tidak menemukan nama saya pada sistem download sertifikat.
 
 Detail:
-Jenjang: ${jenjang}
+Kategori: ${jenjang}
 Sekolah: ${sekolah}
-Nama Peserta: ${peserta}
+Nama: ${peserta}
 
 Mohon bantuannya. Terima kasih.`;
 
@@ -324,12 +409,26 @@ Mohon bantuannya. Terima kasih.`;
 // ===== PDF Generator =====
 async function generateAndDownloadPDF() {
     const jenjang = jenjangSelect.value;
-    const sekolah = sekolahSelect.value;
-    const peserta = pesertaSelect.value;
+    let sekolah = sekolahSelect.value;
+    let peserta = pesertaSelect.value;
+    let nameForFile = '';
 
-    if (!jenjang || !sekolah || !peserta) {
-        alert('Mohon lengkapi data terlebih dahulu.');
-        return;
+    // Handle panitia case
+    if (jenjang === 'Panitia') {
+        sekolah = sekolahInput.value.trim();
+        peserta = panitiaNameInput.value.trim();
+        nameForFile = peserta;
+
+        if (!jenjang || !sekolah || !peserta) {
+            alert('Mohon lengkapi data terlebih dahulu.');
+            return;
+        }
+    } else {
+        if (!jenjang || !sekolah || !peserta) {
+            alert('Mohon lengkapi data terlebih dahulu.');
+            return;
+        }
+        nameForFile = peserta;
     }
 
     // Cek apakah library sudah loaded
@@ -399,7 +498,7 @@ async function generateAndDownloadPDF() {
 
         pdf.addImage(imgData, 'JPEG', 0, 0, 1123, 794);
 
-        const fileName = `sertifikat_${peserta.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')}.pdf`;
+        const fileName = `sertifikat_${nameForFile.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')}.pdf`;
         pdf.save(fileName);
 
         console.log('PDF berhasil dibuat:', fileName);
